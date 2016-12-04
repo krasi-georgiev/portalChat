@@ -230,7 +230,8 @@ void Contacts::setData(QNetworkReply *r){
 
     QMap<QString,QVariant> a=jsonObj.toVariantMap();
 
-    QMap<QString,QVariant> ident=a["identities"].toMap();
+
+    QMap<QString,QVariant> ident=a["profiles"].toMap();
 
     QMap<QString, QVariant>::iterator i;
     for (i = ident.begin(); i != ident.end(); ++i){
