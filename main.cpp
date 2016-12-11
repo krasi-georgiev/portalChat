@@ -3,9 +3,10 @@
 #include <QQmlApplicationEngine>
 #include <QItemSelectionModel>
 #include <QtQml>
+#include <QQmlContext>
 #include <QQuickView>
 #include <QTreeView>
-#include <Contacts.cpp>
+#include <Contacts.h>
 
 
 //TODO features
@@ -22,11 +23,16 @@ void addProfiles(Contacts *model){
 
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
-    QNetworkRequest request(QUrl("https://dev.portal.vip-consult.co.uk/webhook/messenger/v1/profile"));
+    QNetworkRequest request(QUrl("https://portal.vip-consult.co.uk/webhook/messenger/v1/profile"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
 
     manager->get(request);
     QObject::connect(manager, &QNetworkAccessManager::finished,model,&Contacts::setData);
+
+
+//    QNetworkReply *rep = manager->get(request);
+//    QObject::connect(rep, static_cast<void(QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+//    [=](QNetworkReply::NetworkError code){ qDebug() << "error code " << code; });
 
 }
 

@@ -215,38 +215,24 @@ int Contacts::rowCount(const QModelIndex &parent) const
 //! [8]
 
 void Contacts::setData(QNetworkReply *r){
-//    QList<QVariant> t1;
-//    t1 << s;
-
-//    qDebug()  <<t1;
-
-//    rootItem->child(0)->appendChild(new Contact(t1, rootItem));
-
 
     QString strReply = (QString)r->readAll() ;
-    QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
+    QJsonParseError parseError;
 
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8(),&parseError);
     QJsonObject jsonObj = jsonResponse.object();
 
-    QMap<QString,QVariant> a=jsonObj.toVariantMap();
+    QVariant profiles=jsonObj.toVariantMap()["profiles"];
 
 
-    QMap<QString,QVariant> ident=a["profiles"].toMap();
-
-    QMap<QString, QVariant>::iterator i;
-    for (i = ident.begin(); i != ident.end(); ++i){
+    for (const QVariant &row : profiles.value<QSequentialIterable>()) {
         QList<QVariant> t1;
-        t1 << i.value().toMap()["first_name"].toString();
+        t1 << row.toMap()["first_name"];
         Contact *item=new Contact(t1, rootItem);
         rootItem->child(1)->appendChild(item);
-//        this->dataChanged(index(0,0),index(2,2));
-
-        qDebug() <<t1;
     }
 
-
-
-
+    qDebug()<< rootItem;
 }
 
 //void Contacts::addUser(){
