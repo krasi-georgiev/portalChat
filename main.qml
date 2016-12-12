@@ -38,7 +38,7 @@ import QtQuick.Layouts 1.0
                     itemDelegate: Rectangle {
                         color: ( styleData.hasChildren ) ? "lightgreen" : "lightblue"
                         Text {
-                            font.pixelSize: 18
+                            font.pixelSize: 14
                             text: styleData.value // this points to the role we defined in the TableViewColumn below; which one depends on which column this delegate is instantiated for.
                         }
                     }

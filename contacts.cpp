@@ -90,27 +90,24 @@ Contacts::Contacts(QObject *parent)
     QList<QVariant> rootData;
     rootData<<"Name";
     rootItem = new Contact (rootData);
-    QList<Contact*> parents;
 
-    parents.append(rootItem);
 
     QList<QVariant> t;
     t<<"Technicians";
-    Contact *p=new Contact(t, parents.last());
-    parents.last()->appendChild(p);
+    Contact *p=new Contact(t, rootItem );
+    rootItem->appendChild(p);
 
-    parents.append(parents.last()->child(parents.last()->childCount()-1));
 
     QList<QVariant> u;
     u << "Users";
-    parents.pop_back();
-    parents.last()->appendChild(new Contact(u, parents.last()));
+
+    rootItem->appendChild(new Contact(u, rootItem));
 
 
     QList<QVariant> u1;
-    u1 << "U2";
-    parents.append(parents.last()->child(parents.last()->childCount()-1));
-    parents.last()->appendChild(new Contact(u1, parents.last()));
+    u1 << "New tree leaf";
+
+    rootItem->appendChild(new Contact(u1, rootItem ));
 
 }
 //! [0]
@@ -228,11 +225,16 @@ void Contacts::setData(QNetworkReply *r){
     for (const QVariant &row : profiles.value<QSequentialIterable>()) {
         QList<QVariant> t1;
         t1 << row.toMap()["first_name"];
-        Contact *item=new Contact(t1, rootItem);
-        rootItem->child(1)->appendChild(item);
-    }
 
-    qDebug()<< rootItem;
+
+
+        Contact *item=new Contact(t1, rootItem->child(0));
+        rootItem->child(0)->appendChild(item);
+
+
+    }
+    emit dataChanged(index(0,0),index(rootItem->childCount()-1,0));
+
 }
 
 //void Contacts::addUser(){
