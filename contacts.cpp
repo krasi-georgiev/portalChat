@@ -105,13 +105,6 @@ Contacts::Contacts(QObject *parent)
     u << "Users";
     parents.pop_back();
     parents.last()->appendChild(new Contact(u, parents.last()));
-
-
-    QList<QVariant> u1;
-    u1 << "U2";
-    parents.append(parents.last()->child(parents.last()->childCount()-1));
-    parents.last()->appendChild(new Contact(u1, parents.last()));
-
 }
 //! [0]
 
@@ -224,15 +217,16 @@ void Contacts::setData(QNetworkReply *r){
 
     QVariant profiles=jsonObj.toVariantMap()["profiles"];
 
+    beginResetModel();
+
 
     for (const QVariant &row : profiles.value<QSequentialIterable>()) {
         QList<QVariant> t1;
         t1 << row.toMap()["first_name"];
-        Contact *item=new Contact(t1, rootItem);
+        Contact *item=new Contact(t1, rootItem->child(1));
         rootItem->child(1)->appendChild(item);
     }
-
-    qDebug()<< rootItem;
+    endResetModel();
 }
 
 //void Contacts::addUser(){
