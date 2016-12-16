@@ -6,7 +6,7 @@
 #include <QQmlContext>
 #include <QQuickView>
 #include <QTreeView>
-#include <Contacts.h>
+#include <profiles.h>
 
 
 //TODO features
@@ -17,9 +17,7 @@
 //  support hashtags - to force a notify even when a technician is not selected to be notified
 //  think how to design it so we can create temp groups
 
-void addProfiles(Contacts *model){
-
-
+void addProfiles(ProfilesModel *model){
 
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
@@ -27,7 +25,31 @@ void addProfiles(Contacts *model){
     request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
 
     manager->get(request);
-    QObject::connect(manager, &QNetworkAccessManager::finished,model,&Contacts::setData);
+    QObject::connect(manager, &QNetworkAccessManager::finished,[manager,model](QNetworkReply *r) {
+//                        receiver->updateValue("senderValue", newValue);
+
+                        QString strReply = (QString)r->readAll() ;
+                        QJsonParseError parseError;
+
+                        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8(),&parseError);
+                        QJsonObject jsonObj = jsonResponse.object();
+
+                        QVariant profiles=jsonObj.toVariantMap()["profiles"];
+
+
+                        for (const QVariant &row : profiles.value<QSequentialIterable>()) {
+//                            row.toMap()["first_name"],row.toMap()["id_profile"]
+                            model->addProfile(Profile(row.toMap()["first_name"].toString(),row.toMap()["id_profile_identity"].toString()));
+                        }
+
+
+                     }
+    );
+
+
+
+//                     model,&ProfilesModel::setData);
+
 
 
 //    QNetworkReply *rep = manager->get(request);
@@ -53,14 +75,15 @@ int main(int argc, char *argv[])
 //    if (engine.rootObjects().isEmpty())
 //        return -1;
 
-    Contacts ContactsModel;
+    ProfilesModel model;
+    addProfiles(&model);
 
-    addProfiles(&ContactsModel);
+
 
     QQuickView view;
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     QQmlContext *ctxt = view.rootContext();
-    ctxt->setContextProperty("ContactsModel", &ContactsModel);
+    ctxt->setContextProperty("TechniciansModel", &model);
 
     view.setSource(QUrl("qrc:main.qml"));
     view.show();

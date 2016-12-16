@@ -3,7 +3,7 @@ QT += qml quick widgets network
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    contacts.cpp
+    profiles.cpp
 
 RESOURCES += qml.qrc
 
@@ -11,4 +11,6 @@ RESOURCES += qml.qrc
 QML_IMPORT_PATH =
 
 HEADERS += \
-    contacts.h
+    profiles.h
+
+DISTFILES +=

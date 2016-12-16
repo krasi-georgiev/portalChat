@@ -32,20 +32,37 @@ import QtQuick.Layouts 1.0
                     }
                 }
 
-                TreeView {
-                    model: ContactsModel
-                    headerVisible: false
-                    itemDelegate: Rectangle {
-                        color: ( styleData.hasChildren ) ? "lightgreen" : "lightblue"
-                        Text {
-                            font.pixelSize: 18
-                            text: styleData.value // this points to the role we defined in the TableViewColumn below; which one depends on which column this delegate is instantiated for.
-                        }
+                Column {
+                    Text {
+                        text: "Technicians"
+                        font.pixelSize: 20
                     }
-                    TableViewColumn {
-                        role: "display"
-                        title: "Name"
-                    }
+                }
+
+                ListView {
+                    width: 180; height: 200
+                    model: TechniciansModel
+
+                    delegate: Item {
+                                width: 180; height: 20
+                                Column {
+                                    Text { text: name + ":"+id }
+                                }
+                            }
+
+//                        Text {
+//                            font.pixelSize: 14
+//                            text: name + id // this points to the role we defined in the TableViewColumn below; which one depends on which column this delegate is instantiated for.
+//                        }
+
+//                    TableViewColumn {
+//                        role: "display"
+//                        title: "Name"
+//                    }
+//                    TableViewColumn {
+//                        role: "display"
+//                        title: "id"
+//                    }
                 }               
             }
         }
