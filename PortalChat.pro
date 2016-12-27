@@ -1,9 +1,10 @@
-QT += qml quick widgets network
+QT += qml quick widgets network webview
 
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    profiles.cpp
+    profiles.cpp \
+    jobs.cpp
 
 RESOURCES += qml.qrc
 
@@ -11,6 +12,7 @@ RESOURCES += qml.qrc
 QML_IMPORT_PATH =
 
 HEADERS += \
-    profiles.h
+    profiles.h \
+    jobs.h
 
 DISTFILES +=

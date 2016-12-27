@@ -1,62 +1,39 @@
-#include <QGuiApplication>
+//#include <QGuiApplication>
 #include <QApplication>
 #include <QQmlApplicationEngine>
-#include <QItemSelectionModel>
+//#include <QItemSelectionModel>
 #include <QtQml>
-#include <QQmlContext>
-#include <QQuickView>
-#include <QTreeView>
+//#include <QQmlContext>
+#include <QtWebView>
+//#include <QTreeView>
 #include <profiles.h>
-
+//#include <QtWebEngine>
 
 //TODO features
+
+// all new chats shows under job - unasigned
+// the technician reads the message and clicks the job that this is relevant to -
+// the job has a button - move selected text to this job and continue discussion here
+
+// right click the job - mute this job chat - technicians can still message the technician using the hashtag - #chris - ...please have a look a this
+
+// click the user name to open all recent jobs(last 40 days) he is subscribbed to
+
+// from messenger the user will be presented a selection to - For new support ticket click here ,  or select an existing ticket - and it will show all jobs from the last 40 days
+// click user -> show all jobs for assigned to this user + one job RANDOM -> select a job to continue discussing a specific job
+
+// how to move messages from the RANDOM job to a specific job ?
+// maybe when a user start a conversation it is given a selectio - start new ticket or select an existing ticket
+
+// when creating new job from the messenger or the app - how to set company and subscribed users???
+
 //    show user presence from facebook
 //    file uploads ?
 
-//  when chating with a user show tickboxes which technicians to notify for new messages.
-//  support hashtags - to force a notify even when a technician is not selected to be notified
-//  think how to design it so we can create temp groups
+//  support hashtags (autocomplete name) - to force a notify even when a technician has mutted the job chat notification.
 
-void addProfiles(ProfilesModel *model){
-
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
-
-    QNetworkRequest request(QUrl("https://portal.vip-consult.co.uk/webhook/messenger/v1/profile"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
-
-    manager->get(request);
-    QObject::connect(manager, &QNetworkAccessManager::finished,[manager,model](QNetworkReply *r) {
-//                        receiver->updateValue("senderValue", newValue);
-
-                        QString strReply = (QString)r->readAll() ;
-                        QJsonParseError parseError;
-
-                        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8(),&parseError);
-                        QJsonObject jsonObj = jsonResponse.object();
-
-                        QVariant profiles=jsonObj.toVariantMap()["profiles"];
-
-
-                        for (const QVariant &row : profiles.value<QSequentialIterable>()) {
-//                            row.toMap()["first_name"],row.toMap()["id_profile"]
-                            model->addProfile(Profile(row.toMap()["first_name"].toString(),row.toMap()["id_profile_identity"].toString()));
-                        }
-
-
-                     }
-    );
-
-
-
-//                     model,&ProfilesModel::setData);
-
-
-
-//    QNetworkReply *rep = manager->get(request);
-//    QObject::connect(rep, static_cast<void(QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-//    [=](QNetworkReply::NetworkError code){ qDebug() << "error code " << code; });
-
-}
+// the app will have 2 tabs - portal and chat - use the portal for full manipulation and login and the chat just for chat -
+// the chat will query the api using the cookies set when logged in with the portal tab
 
 int main(int argc, char *argv[])
 {
@@ -64,32 +41,30 @@ int main(int argc, char *argv[])
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
+    QtWebView::initialize();
+
+    qmlRegisterType<ProfilesModel>("profiles", 1, 0, "ProfilesModel");
 
 
 
-
-//    qmlRegisterType<Contacts>("vipconsult.portal.chat", 1, 0, "Contacts");
-
-//    QQmlApplicationEngine engine;
-//    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-//    if (engine.rootObjects().isEmpty())
-//        return -1;
-
-    ProfilesModel model;
-    addProfiles(&model);
-
-
-
-    QQuickView view;
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    QQmlContext *ctxt = view.rootContext();
-    ctxt->setContextProperty("TechniciansModel", &model);
-
-    view.setSource(QUrl("qrc:main.qml"));
-    view.show();
-    view.setWidth(600);
-    view.setHeight(400);
+    QQmlApplicationEngine engine;
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     return app.exec();
+
+
+//    ProfilesModel model;
+
+//    QQuickView view;
+//    view.setResizeMode(QQuickView::SizeRootObjectToView);
+//    QQmlContext *ctxt = view.rootContext();
+//    ctxt->setContextProperty("TechniciansModel", &model);
+
+//    view.setSource(QUrl("qrc:main.qml"));
+//    view.show();
+
+//    view.showMaximized();
+
+//    return app.exec();
 }
 
 

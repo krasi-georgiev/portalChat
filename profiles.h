@@ -1,21 +1,21 @@
 #include <QAbstractListModel>
 #include <QStringList>
 
-//![0]
-class Profile
-{
-public:
-    Profile(const QString &name, const QString &id);
-//![0]
+////![0]
+//class Profile
+//{
+//public:
+//    Profile(const QString &name, const QString &id);
+////![0]
 
-    QString id() const;
-    QString name() const;
+//    QString id() const;
+//    QString name() const;
 
-private:
-    QString m_id;
-    QString m_name;
-//![1]
-};
+//private:
+//    QString m_id;
+//    QString m_name;
+////![1]
+//};
 
 class ProfilesModel : public QAbstractListModel
 {
@@ -29,7 +29,7 @@ public:
     ProfilesModel(QObject *parent = 0);
 //![1]
 
-    void addProfile(const Profile &profile);
+    void addProfile(const QMap<QString, QString> &profile);
 
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
 
@@ -38,7 +38,7 @@ public:
 protected:
     QHash<int, QByteArray> roleNames() const;
 private:
-    QList<Profile> m_profiles;
+    QList<QMap<QString,QString>> m_profiles;
 //![2]
 };
 //![2]
