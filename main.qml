@@ -12,19 +12,20 @@ ApplicationWindow {
     width: Screen.width
     height: Screen.height
 
+    property var cookie;
+
+
     SwipeView {
         id: swipeView
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
-
         Item {
             Portal{
-
             }
         }
         Item {
-            Chat {
 
+            Chat {
             }
         }
     }
@@ -37,6 +38,25 @@ ApplicationWindow {
         }
         TabButton {
             text: qsTr("Chat")
+
+//            Popup {
+
+//                    Label{
+//                        text: root.cookie
+//                    }
+//                    id: popup
+//                    x: 100
+//                    y: 100
+//                    width: 200
+//                    height: 300
+//                    modal: true
+//                    focus: true
+//                    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+//                }
+
+//            onClicked: {
+//                popup.open()
+//            }
         }
     }
 }

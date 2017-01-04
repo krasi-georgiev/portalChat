@@ -4,56 +4,14 @@
 #include <QJsonParseError>
 #include <QUrl>
 #include <QNetworkRequest>
+#include <QNetworkCookieJar>
+#include <QNetworkCookie>
 #include <QNetworkReply>
 #include <QJsonObject>
 
-//Profile::Profile(const QString &name, const QString &id)
-//    : m_id(id), m_name(name)
-//{
-//}
-
-//QString Profile::id() const
-//{
-//    return m_id;
-//}
-
-//QString Profile::name() const
-//{
-//    return m_name;
-//}
-
 ProfilesModel::ProfilesModel(QObject *parent)
-    : QAbstractListModel(parent)
-{
+    : QAbstractListModel(parent){
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
-
-    QNetworkRequest request(QUrl("https://portal.vip-consult.co.uk/webhook/messenger/v1/profile"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
-
-    manager->get(request);
-    QObject::connect(manager, &QNetworkAccessManager::finished,[=](QNetworkReply *r) {
-
-                        QString strReply = (QString)r->readAll() ;
-                        QJsonParseError parseError;
-
-                        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8(),&parseError);
-                        QJsonObject jsonObj = jsonResponse.object();
-
-                        QVariant profiles=jsonObj.toVariantMap()["profiles"];
-
-
-                        for (const QVariant &row : profiles.value<QSequentialIterable>()) {
-//                            row.toMap()["first_name"],row.toMap()["id_profile"]
-                            QMap<QString,QString> p;
-                            p["name"]=row.toMap()["first_name"].toString();
-                            p["id"]=row.toMap()["id_profile_identity"].toString();
-                            this->addProfile(p);
-                        }
-
-
-                     }
-    );
 }
 
 void ProfilesModel::addProfile(const QMap<QString,QString> &profile)
@@ -61,6 +19,53 @@ void ProfilesModel::addProfile(const QMap<QString,QString> &profile)
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_profiles<<profile;
     endInsertRows();
+}
+
+void ProfilesModel::reload(QString cookie)
+{
+    QUrl url("https://dev.portal.vip-consult.co.uk/webhook/messenger/v1/profile");
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+    QNetworkCookieJar *jar = new QNetworkCookieJar(manager);
+
+    QList<QNetworkCookie> cookies({QNetworkCookie("PHPSESSID",cookie.toUtf8())});
+
+    jar->setCookiesFromUrl(cookies,url);
+    QNetworkRequest request(url);
+    manager->setCookieJar(jar);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
+
+    manager->get(request);
+    QObject::connect(manager, &QNetworkAccessManager::finished,[=](QNetworkReply *r) {
+            QString strReply = (QString)r->readAll() ;
+            QJsonParseError parseError;
+
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8(),&parseError);
+            QJsonObject jsonObj = jsonResponse.object();
+
+            QVariant profiles=jsonObj.toVariantMap()["profiles"];
+
+            if(!profiles.isNull()){
+                qDebug()<<cookie;
+
+                for (const QVariant &row : profiles.value<QSequentialIterable>()) {
+                    QMap<QString,QString> p;
+                    p["name"]=row.toMap()["first_name"].toString();
+                    p["id"]=row.toMap()["id_profile_identity"].toString();
+                    addProfile(p);
+                }
+            }
+            else{
+//                qDebug()<<cookie;
+                beginResetModel();
+                m_profiles.clear();
+                endResetModel();
+            }
+        }
+    );
+
+    //    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+//    endInsertRows();
 }
 
 int ProfilesModel::rowCount(const QModelIndex & parent) const {
@@ -79,7 +84,6 @@ QVariant ProfilesModel::data(const QModelIndex & index, int role) const {
         return profile["name"];
     return QVariant();
 }
-
 //![0]
 QHash<int, QByteArray> ProfilesModel::roleNames() const {
     QHash<int, QByteArray> roles;

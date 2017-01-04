@@ -1,15 +1,20 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.4
+import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
 import QtQuick.Window 2.2
 
 import profiles 1.0
 
+
+
 SplitView{
     anchors.fill: parent
+
     Rectangle {
         id:first
         Layout.minimumWidth: Screen.width/3
+        width: Layout.minimumWidth
         color: "grey"
 //            Rectangle {
 //                id:"profileSearch"
@@ -24,14 +29,19 @@ SplitView{
 //            }
 
 
+
         ListView {
             id:"technicians"
             displayMarginBeginning:4
-            height: Screen.height/3
+            height: parent.height
             width:parent.width
-            model: ProfilesModel{}
+            model: ProfilesModel{
+                id: model
+            }
+
+
             highlight: Rectangle {
-                width:parent.width
+                width:technicians.width
                 color: "lightsteelblue" }
             focus: true
             header: Text{ text:"Technicians"; font.pixelSize: 18}
@@ -52,8 +62,16 @@ SplitView{
                         }
                     }
                 }
-
         }
+        Connections {
+                target: root
+                onCookieChanged: {
+                        console.log("model reloading");
+                        model.reload(root.cookie)
+                    }
+        }
+
+
     }
 
 

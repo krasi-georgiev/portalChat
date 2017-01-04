@@ -27,6 +27,7 @@ public:
     };
 
     ProfilesModel(QObject *parent = 0);
+    bool isLogged;
 //![1]
 
     void addProfile(const QMap<QString, QString> &profile);
@@ -34,7 +35,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
 
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-
+    Q_INVOKABLE void reload(QString cookie);
 protected:
     QHash<int, QByteArray> roleNames() const;
 private:
