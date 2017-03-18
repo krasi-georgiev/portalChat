@@ -1,5 +1,7 @@
 
 #include "profiles.h"
+#include <QSettings>
+
 #include <QNetworkAccessManager>
 #include <QJsonParseError>
 #include <QUrl>
@@ -21,9 +23,10 @@ void ProfilesModel::addProfile(const QMap<QString,QString> &profile)
     endInsertRows();
 }
 
-void ProfilesModel::reload(QString cookie)
+void ProfilesModel::reload(QString cookie,QString endpoint)
 {
-    QUrl url("https://dev.portal.vip-consult.co.uk/webhook/messenger/v1/profile");
+    QSettings settings("portalChat", "Vip Consult");
+    QUrl url(settings.value("portalApi").toString()+"profile"+endpoint);
 
     QNetworkAccessManager *manager = new QNetworkAccessManager();
     QNetworkCookieJar *jar = new QNetworkCookieJar(manager);
@@ -45,9 +48,11 @@ void ProfilesModel::reload(QString cookie)
 
             QVariant profiles=jsonObj.toVariantMap()["profiles"];
 
-            if(!profiles.isNull()){
-                qDebug()<<cookie;
+            beginResetModel();
+            m_profiles.clear();
+            endResetModel();
 
+            if(!profiles.isNull()){
                 for (const QVariant &row : profiles.value<QSequentialIterable>()) {
                     QMap<QString,QString> p;
                     p["name"]=row.toMap()["first_name"].toString();
@@ -55,17 +60,10 @@ void ProfilesModel::reload(QString cookie)
                     addProfile(p);
                 }
             }
-            else{
-//                qDebug()<<cookie;
-                beginResetModel();
-                m_profiles.clear();
-                endResetModel();
-            }
+            dataChanged();
+
         }
     );
-
-    //    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-//    endInsertRows();
 }
 
 int ProfilesModel::rowCount(const QModelIndex & parent) const {
@@ -78,18 +76,19 @@ QVariant ProfilesModel::data(const QModelIndex & index, int role) const {
         return QVariant();
 
     const QMap<QString,QString> &profile = m_profiles[index.row()];
-    if (role == IdRole)
+    if (role == idRole)
         return profile["id"];
-    else if (role == NameRole)
+    else if (role == nameRole)
         return profile["name"];
     return QVariant();
 }
 //![0]
 QHash<int, QByteArray> ProfilesModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[IdRole] = "id";
-    roles[NameRole] = "name";
+    roles[idRole] = "id";
+    roles[nameRole] = "name";
     return roles;
 }
+
 //![0]
 

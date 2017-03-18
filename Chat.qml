@@ -5,124 +5,162 @@ import QtQuick.Layouts 1.0
 import QtQuick.Window 2.2
 
 import profiles 1.0
+import jobs 1.0
 
-
-
-SplitView{
+Item{
+    Text{
+        id: loginWarning
+        anchors.fill: parent
+        text: "Login first"
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: 40
+    }
     anchors.fill: parent
 
-    Rectangle {
-        id:first
-        Layout.minimumWidth: Screen.width/3
-        width: Layout.minimumWidth
-        color: "grey"
-//            Rectangle {
-//                id:"profileSearch"
-//                height:30
-//                TextInput{
-//                    placeholderText: "Search"
-//                    Layout.fillWidth: true
-//                    leftPadding: 100
-//                    maximumLength: 14
-//                    focus: true
-//                }
-//            }
 
 
 
-        ListView {
-            id:"technicians"
-            displayMarginBeginning:4
-            height: parent.height
-            width:parent.width
-            model: ProfilesModel{
-                id: model
-            }
+    SplitView{
+        id: splitView
+        anchors.fill: parent
 
 
-            highlight: Rectangle {
-                width:technicians.width
-                color: "lightsteelblue" }
-            focus: true
-            header: Text{ text:"Technicians"; font.pixelSize: 18}
-            delegate:
-                Item {
-                    height: 20
+
+        Rectangle {
+            Layout.minimumWidth: Screen.width/5
+            width:Screen.width/3
+
+            color: "silver"
+
+            ListView {
+                id: jobs
+                header: Text{ text:"JOBS"; font.pixelSize: 18}
+                anchors.fill:parent
+
+
+                highlightMoveDuration: 0
+                highlight: Rectangle {
+                    color: "lightsteelblue"
+                }
+
+                model: JobsModel{
+                    id:jobsModel
+                    onDataChanged: if(jobsModel.rowCount()===0){
+                                       splitView.visible=false;
+                                       loginWarning.visible=!splitView.visible;
+                                   }
+                                   else{
+                                       splitView.visible=true ;
+                                       loginWarning.visible=!splitView.visible;
+                                   }
+                }
+                delegate: Text {
+                    text: title+" - "+company
                     width: parent.width
-                    Text {
-                        text: name + ":"+id
+
+                    MouseArea {
+                        Menu {
+                            id: contextMenu
+                            MenuItem {
+                                text: qsTr('Delete')
+                                onTriggered: console.log("Delete clicked")
+                            }
+
+                        }
+                        acceptedButtons: Qt.RightButton
+                        anchors.fill: parent
+                        onClicked:contextMenu.open()
                     }
                     MouseArea {
-                        z: 1
                         hoverEnabled: false
                         anchors.fill: parent
                         onClicked:{
-                            technicians.currentIndex = index
-                            technicians.forceActiveFocus()
+                            jobs.currentIndex = index
+                            jobs.forceActiveFocus()
+                            profilesModel.reload(root.cookie,"?id_job="+id)
                         }
                     }
-                }
+               }
+            }
+
+
         }
+
+        Rectangle {
+            id:first
+            Layout.minimumWidth: Screen.width/3
+            width: Layout.minimumWidth
+            color: "grey"
+    //            Rectangle {
+    //                id:"profileSearch"
+    //                height:30
+    //                TextInput{
+    //                    placeholderText: "Search"
+    //                    Layout.fillWidth: true
+    //                    leftPadding: 100
+    //                    maximumLength: 14
+    //                    focus: true
+    //                }
+    //            }
+
+
+
+            ListView {
+                header: Text{ text:"Technicians"; font.pixelSize: 18}
+                id: profiles
+                displayMarginBeginning:4
+                anchors.fill: parent
+                model: ProfilesModel{
+                    id: profilesModel
+                }
+
+                highlightMoveDuration: 0
+                highlight: Rectangle {
+                    color: "lightsteelblue"
+                }
+
+                delegate:
+                    Item {
+                        height: 20
+                        width: parent.width
+                        Text {
+                            text: name + ":"+id
+                        }
+                        MouseArea {
+                            hoverEnabled: false
+                            anchors.fill: parent
+                            onClicked:{
+                                profiles.currentIndex = index
+                                profiles.forceActiveFocus()
+                            }
+                        }
+                    }
+            }
+
+        }
+
         Connections {
                 target: root
                 onCookieChanged: {
-                        console.log("model reloading");
-                        model.reload(root.cookie)
+                        console.log("modelS reloading");
+                        jobsModel.reload(root.cookie)
                     }
+
         }
 
 
-    }
 
+        Rectangle {
+            Layout.minimumWidth: Screen.width/3
+            color: "silver"
 
-
-    Rectangle {
-        Layout.minimumWidth: Screen.width/3
-        color: "silver"
-
-        ListModel {
-            id: "jobsModel"
-
-            ListElement {
-                name: "UNASSIGNED"
-                id_job: "0"
+            Label  {
+                text:"MESSAGES"
+                font.pixelSize:20
             }
-            ListElement {
-                name: "Proactive Office move"
-               id_job: "555"
-            }
-            ListElement {
-                name: "Make research for a good windows and linux monitoring tool"
-                id_job: "123"
-            }
-            ListElement {
-                name: "HA and LB for PAI"
-                id_job: "456"
-            }
+
+
         }
-
-        ListView {
-            height: parent.height
-            width:parent.width
-            model: jobsModel
-            header: Text{ text:"JOBS"; font.pixelSize: 18}
-            delegate: Text {
-                text: name + ": " + id_job
-            }
-        }
-
-    }
-
-
-    Rectangle {
-        Layout.minimumWidth: Screen.width/3
-        color: "silver"
-
-        Label  {
-            text:"MESSAGES"
-            font.pixelSize:20
-        }
-
-
     }
 }

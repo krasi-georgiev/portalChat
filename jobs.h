@@ -1,50 +1,35 @@
-//#ifndef JOBS_H
-//#define JOBS_H
-//#include <QAbstractListModel>
-//#include <QStringList>
+#include <QAbstractListModel>
+#include <QStringList>
 
-////![0]
-//class jobsModel
-//{
-//public:
-//    jobsModel(const QString &name, const QString &id);
-////![0]
+class JobsModel : public QAbstractListModel
+{
+    Q_OBJECT
+public:
+    enum jobsRoles {
+        idRole = Qt::UserRole + 1,
+        titleRole,
+        companyRole,
 
-//    QString id() const;
-//    QString name() const;
+    };
 
-//private:
-//    QString m_id;
-//    QString m_name;
-////![1]
-//};
+    JobsModel(QObject *parent = 0);
+//![1]
 
-//class ProfilesModel : public QAbstractListModel
-//{
-//    Q_OBJECT
-//public:
-//    enum ProfilesRoles {
-//        IdRole = Qt::UserRole + 1,
-//        NameRole
-//    };
+    void addJob(const QMap<QString, QString> &profile);
 
-//    ProfilesModel(QObject *parent = 0);
-////![1]
+    int rowCount(const QModelIndex & parent = QModelIndex()) const;
 
-//    void addProfile(const Profile &profile);
+    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    Q_INVOKABLE void reload(QString cookie);
+protected:
+    QHash<int, QByteArray> roleNames() const;
+private:
+    QList<QMap<QString,QString>> m_jobs;
 
-//    int rowCount(const QModelIndex & parent = QModelIndex()) const;
-
-//    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-
-//protected:
-//    QHash<int, QByteArray> roleNames() const;
-//private:
-//    QList<Profile> m_profiles;
-////![2]
-//};
-////![2]
+signals:
+   void dataChanged();
+//![2]
+};
+//![2]
 
 
-
-//#endif // JOBS_H

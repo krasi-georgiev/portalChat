@@ -1,54 +1,90 @@
 //#include <QGuiApplication>
 #include <QApplication>
-#include <QQmlApplicationEngine>
-//#include <QItemSelectionModel>
+#include <QSettings>
 #include <QtQml>
 //#include <QQmlContext>
 #include <QtWebView>
 //#include <QTreeView>
 #include <profiles.h>
+#include <jobs.h>
 //#include <QtWebEngine>
 
-//TODO features
 
-// all new chats shows under job - unasigned
-// the technician reads the message and clicks the job that this is relevant to -
-// the job has a button - move selected text to this job and continue discussion here
+/*
+TODO features
 
-// right click the job - mute this job chat - technicians can still message the technician using the hashtag - #chris - ...please have a look a this
 
-// click the user name to open all recent jobs(last 40 days) he is subscribbed to
+use rowLayout instead of a split view so we can use it in a phone - sort of fluid layout
 
-// from messenger the user will be presented a selection to - For new support ticket click here ,  or select an existing ticket - and it will show all jobs from the last 40 days
-// click user -> show all jobs for assigned to this user + one job RANDOM -> select a job to continue discussing a specific job
+show user presence from facebook
+file uploads ?
 
-// how to move messages from the RANDOM job to a specific job ?
-// maybe when a user start a conversation it is given a selectio - start new ticket or select an existing ticket
 
-// when creating new job from the messenger or the app - how to set company and subscribed users???
+App workflow and views
+    Jobs - all from the portal
+        when sellected shows all attached user and option to add or remove user
+        how to mute conversation ? remove the technicians or set some param to mute ?
 
-//    show user presence from facebook
-//    file uploads ?
+Job request from a new user
+    register the user on the portal if doesn't exist.
+    create a new job attached to the Vip-Consult company - so we can add bills and generate anonymous invoices
+    add the user to the job so he receive notifications when we post an update
 
-//  support hashtags (autocomplete name) - to force a notify even when a technician has mutted the job chat notification.
 
-// the app will have 2 tabs - portal and chat - use the portal for full manipulation and login and the chat just for chat -
-// the chat will query the api using the cookies set when logged in with the portal tab
+Job request from an existing user
+    send auto message - a selection to - For new support ticket click here ,  or select an existing ticket - and it will show all jobs from the last 10 days
+    select an existing chat topic or enter a title to start a new one.
 
+JOB company assignment
+    when started put in a vip consult
+    right click to assigns to another company
+    need to allow users outside the company to be attached to any job
+        check the security complication ????
+
+Job notifications
+    no more email notifications - will use the app
+    right click to mute - force a message notification with the hashtag - #chris  ...please have a look a this
+    All technicians receive a notification and can right click to mute if it doesn't concern them
+        later can filter which technicians receive notification by the page Id - like support channels
+
+
+
+
+
+Merge jobs
+    when the user decides to start a new job but there was already an existing job then can merge
+
+
+
+*/
 int main(int argc, char *argv[])
 {
 
+    QSettings settings("portalChat", "Vip Consult");
+    settings.setValue("portalUrl", "https://dev.portal.vip-consult.co.uk/");
+    settings.setValue("portalApi", "https://dev.portal.vip-consult.co.uk/webhook/messenger/v1/");
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
     QtWebView::initialize();
 
     qmlRegisterType<ProfilesModel>("profiles", 1, 0, "ProfilesModel");
+    qmlRegisterType<JobsModel>("jobs", 1, 0, "JobsModel");
 
 
 
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+
+    QQmlContext *context = engine.rootContext();
+    context->setContextProperty("portalUrl", settings.value("portalUrl").toString());
+//    engine.rootContext().setContextProperty("url", settings.value("url").toString());
+
+//    qDebug() << "Property value:" << QQmlProperty::read(object, "url").toString();
+
+      engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+
 
 //    QObject* window = getQmlWindow("appWindow");
 
